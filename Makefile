@@ -28,7 +28,7 @@ classes: $(CLASSES)
 	$(JC) $(JCFLAGS) $(CLASSES)
 
 test:
-	$(JR) $(JRFLAGS) domain.TestRunner
+	@$(JR) $(JRFLAGS) domain.TestRunner
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)

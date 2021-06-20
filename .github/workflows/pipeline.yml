@@ -7,10 +7,12 @@ on:
     branches: [ '**' ]
 
 jobs:
-  build:
+  build_test:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
     - name: build
       run: make
+    - name: test
+      run: diff <(make test) <(echo true)
