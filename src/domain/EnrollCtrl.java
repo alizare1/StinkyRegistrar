@@ -5,6 +5,13 @@ import java.util.List;
 import domain.exceptions.EnrollmentRulesViolationException;
 
 public class EnrollCtrl {
+    static final int LIMITED_GPA = 12;
+    static final int MIN_A_GPA = 16;
+
+    static final int LIMITED_MAX_ALLOWED_UNITS = 14;
+    static final int BELOW_A_MAX_ALLOWED_UNITS = 16;
+    static final int MAX_ALLOWED_UNITS = 20;
+
 
 	public void enroll(Student s, List<CSE> courses) throws EnrollmentRulesViolationException {
 
@@ -58,9 +65,9 @@ public class EnrollCtrl {
 		for (CSE o : courses)
 			unitsRequested += o.getCourse().getUnits();
 
-		if ((s.getGpa() < 12 && unitsRequested > 14) ||
-				(s.getGpa() < 16 && unitsRequested > 16) ||
-				(unitsRequested > 20))
+		if ((s.getGpa() < LIMITED_GPA && unitsRequested > LIMITED_MAX_ALLOWED_UNITS) ||
+				(s.getGpa() < MIN_A_GPA && unitsRequested > BELOW_A_MAX_ALLOWED_UNITS) ||
+				(unitsRequested > MAX_ALLOWED_UNITS))
 			throw new EnrollmentRulesViolationException(String.format("Number of units (%d) requested does not match GPA of %f", unitsRequested, s.getGpa()));
     }
 }
