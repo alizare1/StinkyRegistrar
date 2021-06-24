@@ -40,6 +40,16 @@ public class Student {
 	    transcript.get(term).put(course, grade);
     }
 
+	public boolean hasPassed(Course course) {
+		for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
+			for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
+				if (r.getKey().equals(course) && r.getValue() >= 10)
+					return true;
+			}
+		}
+		return false;
+	}
+
     public List<CourseSection> getCurrentTerm() {
         return currentTerm;
     }
