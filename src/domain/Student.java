@@ -30,6 +30,18 @@ public class Student {
 		currentTerm.add(new CourseSection(c, section));
 	}
 
+	public double getGpa() {
+		double points = 0;
+		int totalUnits = 0;
+        for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
+            for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
+                points += r.getValue() * r.getKey().getUnits();
+                totalUnits += r.getKey().getUnits();
+            }
+		}
+		return totalUnits == 0 ? 0 : points / totalUnits;
+	}
+
 	public Map<Term, Map<Course, Double>> getTranscript() {
 		return transcript;
 	}

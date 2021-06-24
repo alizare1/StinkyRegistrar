@@ -6,30 +6,15 @@ import java.util.Map;
 import domain.exceptions.EnrollmentRulesViolationException;
 
 public class EnrollCtrl {
+
 	public void enroll(Student s, List<CSE> courses) throws EnrollmentRulesViolationException {
-        Map<Term, Map<Course, Double>> transcript = s.getTranscript();
 
         checkPassed(s, courses);
         checkPrerequisites(s, courses);
         checkExamTimeConflicts(courses);
         checkEnrollDuplication(courses);
+        checkAllowedUnitsCount(s, courses);
 
-		int unitsRequested = 0;
-		for (CSE o : courses)
-			unitsRequested += o.getCourse().getUnits();
-		double points = 0;
-		int totalUnits = 0;
-        for (Map.Entry<Term, Map<Course, Double>> tr : transcript.entrySet()) {
-            for (Map.Entry<Course, Double> r : tr.getValue().entrySet()) {
-                points += r.getValue() * r.getKey().getUnits();
-                totalUnits += r.getKey().getUnits();
-            }
-		}
-		double gpa = points / totalUnits;
-		if ((gpa < 12 && unitsRequested > 14) ||
-				(gpa < 16 && unitsRequested > 16) ||
-				(unitsRequested > 20))
-			throw new EnrollmentRulesViolationException(String.format("Number of units (%d) requested does not match GPA of %f", unitsRequested, gpa));
 		for (CSE o : courses)
 			s.takeCourse(o.getCourse(), o.getSection());
 	}
@@ -67,5 +52,16 @@ public class EnrollCtrl {
                     throw new EnrollmentRulesViolationException(String.format("%s is requested to be taken twice", o.getCourse().getName()));
             }
         } 
+    }
+
+    private void checkAllowedUnitsCount(Student s, List<CSE> courses) throws EnrollmentRulesViolationException {
+		int unitsRequested = 0;
+		for (CSE o : courses)
+			unitsRequested += o.getCourse().getUnits();
+
+		if ((s.getGpa() < 12 && unitsRequested > 14) ||
+				(s.getGpa() < 16 && unitsRequested > 16) ||
+				(unitsRequested > 20))
+			throw new EnrollmentRulesViolationException(String.format("Number of units (%d) requested does not match GPA of %f", unitsRequested, s.getGpa()));
     }
 }
