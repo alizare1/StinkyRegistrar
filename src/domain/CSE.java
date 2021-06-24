@@ -23,6 +23,10 @@ public class CSE {
 		this.section = section;
 		this.examDate = examDate;
 	}
+
+	public boolean hasExamTimeConflict(CSE o) {
+		return this.getExamTime().equals(o.getExamTime());
+	}
 	
 	public Course getCourse() {
 		return course;
