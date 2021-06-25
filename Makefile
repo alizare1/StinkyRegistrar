@@ -15,7 +15,7 @@ CLASSES = \
 	$(SRC_DIR)/exceptions/StudentNotFoundException.java \
 	$(SRC_DIR)/exceptions/UnknownOfferingsException.java \
 	$(SRC_DIR)/Course.java \
-	$(SRC_DIR)/CSE.java \
+	$(SRC_DIR)/Offering.java \
 	$(SRC_DIR)/EnrollCtrl.java \
 	$(SRC_DIR)/Student.java \
 	$(SRC_DIR)/Term.java \
