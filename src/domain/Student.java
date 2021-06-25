@@ -47,8 +47,7 @@ public class Student {
 	}
 
 	public void addTranscriptRecord(Course course, Term term, double grade) {
-	    if (!transcript.containsKey(term))
-	        transcript.put(term, new HashMap<>());
+		transcript.computeIfAbsent(term, k -> new HashMap<>());
 	    transcript.get(term).put(course, grade);
     }
 
