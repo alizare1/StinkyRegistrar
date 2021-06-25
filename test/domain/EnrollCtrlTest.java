@@ -65,32 +65,42 @@ public class EnrollCtrlTest {
 	}
 
 	@Test
-	public void canTakeBasicCoursesInFirstTerm() throws EnrollmentRulesViolationException {
+	public void canTakeBasicCoursesInFirstTerm() {
 		new EnrollCtrl().enroll(bebe, requestedOfferings(math1, phys1, prog));
 		assertTrue(hasTaken(bebe, math1, phys1, prog));
 	}
 
 	@Test
-	public void canTakeNoOfferings() throws EnrollmentRulesViolationException {
+	public void canTakeNoOfferings() {
 		new EnrollCtrl().enroll(bebe, new ArrayList<>());
 		assertTrue(hasTaken(bebe));
 	}
 
-	@Test(expected = EnrollmentRulesViolationException.class)
-	public void cannotTakeWithoutPreTaken() throws EnrollmentRulesViolationException {
-		new EnrollCtrl().enroll(bebe, requestedOfferings(math2, phys1, prog));
-	}
+	@Test
+	public void cannotTakeWithoutPreTaken() {
+		List<EnrollmentRulesViolationException> violations = new EnrollCtrl().enroll(bebe, requestedOfferings(math2, phys1, prog));
 
-	@Test(expected = EnrollmentRulesViolationException.class)
-	public void cannotTakeWithoutPrePassed() throws EnrollmentRulesViolationException {
-		bebe.addTranscriptRecord(phys1, new Term("t1"), 18);
-		bebe.addTranscriptRecord(prog, new Term("t1"), 12);
-		bebe.addTranscriptRecord(math1, new Term("t1"), 8.4);
-		new EnrollCtrl().enroll(bebe, requestedOfferings(math2, ap));
+		List<EnrollmentRulesViolationException> expectedViolations = new ArrayList<>();
+		expectedViolations.add(new EnrollmentRulesViolationException("The student has not passed MATH1 as a prerequisite of MATH2"));
+		
+		assertArrayEquals(expectedViolations.toArray(), violations.toArray());
 	}
 
 	@Test
-	public void canTakeWithPreFinallyPassed() throws EnrollmentRulesViolationException {
+	public void cannotTakeWithoutPrePassed() {
+		bebe.addTranscriptRecord(phys1, new Term("t1"), 18);
+		bebe.addTranscriptRecord(prog, new Term("t1"), 12);
+		bebe.addTranscriptRecord(math1, new Term("t1"), 8.4);
+		List<EnrollmentRulesViolationException> violations = new EnrollCtrl().enroll(bebe, requestedOfferings(math2, ap));
+
+		List<EnrollmentRulesViolationException> expectedViolations = new ArrayList<>();
+		expectedViolations.add(new EnrollmentRulesViolationException("The student has not passed MATH1 as a prerequisite of MATH2"));
+
+		assertArrayEquals(expectedViolations.toArray(), violations.toArray());
+	}
+
+	@Test
+	public void canTakeWithPreFinallyPassed() {
 		bebe.addTranscriptRecord(phys1, new Term("t1"), 18);
 		bebe.addTranscriptRecord(prog, new Term("t1"), 12);
 		bebe.addTranscriptRecord(math1, new Term("t1"), 8.4);
@@ -103,8 +113,8 @@ public class EnrollCtrlTest {
 		assertTrue(hasTaken(bebe, math2, dm));
 	}
 
-	@Test(expected = EnrollmentRulesViolationException.class)
-	public void cannotTakeAlreadyPassed1() throws EnrollmentRulesViolationException {
+	@Test
+	public void cannotTakeAlreadyPassed1() {
 		bebe.addTranscriptRecord(phys1, new Term("t1"), 18);
 		bebe.addTranscriptRecord(prog, new Term("t1"), 12);
 		bebe.addTranscriptRecord(math1, new Term("t1"), 8.4);
@@ -113,40 +123,66 @@ public class EnrollCtrlTest {
 		bebe.addTranscriptRecord(ap, new Term("t2"), 16);
 		bebe.addTranscriptRecord(math1, new Term("t2"), 10.5);
 
-		new EnrollCtrl().enroll(bebe, requestedOfferings(math1, dm));
-	}
+		List<EnrollmentRulesViolationException> violations = new EnrollCtrl().enroll(bebe, requestedOfferings(math1, dm));
 
-	@Test(expected = EnrollmentRulesViolationException.class)
-	public void cannotTakeAlreadyPassed2() throws EnrollmentRulesViolationException {
-		bebe.addTranscriptRecord(phys1, new Term("t1"), 18);
-		bebe.addTranscriptRecord(prog, new Term("t1"), 12);
-		bebe.addTranscriptRecord(math1, new Term("t1"), 8.4);
-
-		bebe.addTranscriptRecord(phys2, new Term("t2"), 10);
-		bebe.addTranscriptRecord(ap, new Term("t2"), 16);
-		bebe.addTranscriptRecord(math1, new Term("t2"), 10.5);
-
-		new EnrollCtrl().enroll(bebe, requestedOfferings(phys1, dm));
-	}
-
-	@Test(expected = EnrollmentRulesViolationException.class)
-	public void cannotTakeOfferingsWithSameExamTime() throws EnrollmentRulesViolationException {
-		Calendar cal = Calendar.getInstance();
-		new EnrollCtrl().enroll(bebe,
-				List.of(
-					new Offering(phys1, cal.getTime()),
-					new Offering(math1, cal.getTime()),
-					new Offering(phys1, cal.getTime())
-				));
-	}
-
-	@Test(expected = EnrollmentRulesViolationException.class)
-	public void cannotTakeACourseTwice() throws EnrollmentRulesViolationException {
-		new EnrollCtrl().enroll(bebe, requestedOfferings(phys1, dm, phys1));
+		List<EnrollmentRulesViolationException> expectedViolations = new ArrayList<>();
+		expectedViolations.add(new EnrollmentRulesViolationException("The student has already passed MATH1"));
+		
+		assertArrayEquals(expectedViolations.toArray(), violations.toArray());
 	}
 
 	@Test
-	public void canTake14WithGPA11() throws EnrollmentRulesViolationException {
+	public void cannotTakeAlreadyPassed2() {
+		bebe.addTranscriptRecord(phys1, new Term("t1"), 18);
+		bebe.addTranscriptRecord(prog, new Term("t1"), 12);
+		bebe.addTranscriptRecord(math1, new Term("t1"), 8.4);
+
+		bebe.addTranscriptRecord(phys2, new Term("t2"), 10);
+		bebe.addTranscriptRecord(ap, new Term("t2"), 16);
+		bebe.addTranscriptRecord(math1, new Term("t2"), 10.5);
+
+		List<EnrollmentRulesViolationException> violations = new EnrollCtrl().enroll(bebe, requestedOfferings(phys1, dm));
+
+		List<EnrollmentRulesViolationException> expectedViolations = new ArrayList<>();
+		expectedViolations.add(new EnrollmentRulesViolationException("The student has already passed PHYS1"));
+		
+		assertArrayEquals(expectedViolations.toArray(), violations.toArray());
+	}
+
+
+
+	@Test
+	public void cannotTakeOfferingsWithSameExamTime() {
+		Calendar cal = Calendar.getInstance();
+
+		List<EnrollmentRulesViolationException> violations = new EnrollCtrl().enroll(bebe,
+			List.of(
+				new Offering(phys1, cal.getTime()),
+				new Offering(math1, cal.getTime()),
+				new Offering(phys1, cal.getTime())
+			));
+		List<EnrollmentRulesViolationException> expectedViolations = new ArrayList<>();
+		expectedViolations.add(new EnrollmentRulesViolationException("Two offerings PHYS1 - 1 and MATH1 - 1 have the same exam time"));
+		expectedViolations.add(new EnrollmentRulesViolationException("Two offerings PHYS1 - 1 and PHYS1 - 1 have the same exam time"));
+		expectedViolations.add(new EnrollmentRulesViolationException("Two offerings MATH1 - 1 and PHYS1 - 1 have the same exam time"));
+		expectedViolations.add(new EnrollmentRulesViolationException("PHYS1 is requested to be taken twice"));
+
+		assertArrayEquals(expectedViolations.toArray(), violations.toArray());
+	}
+
+	@Test
+	public void cannotTakeACourseTwice() {
+		List<EnrollmentRulesViolationException> violations = new EnrollCtrl().enroll(bebe, requestedOfferings(phys1, dm, phys1));
+
+		List<EnrollmentRulesViolationException> expectedViolations = new ArrayList<>();
+		expectedViolations.add(new EnrollmentRulesViolationException("The student has not passed PROG as a prerequisite of DM"));
+		expectedViolations.add(new EnrollmentRulesViolationException("PHYS1 is requested to be taken twice"));
+
+		assertArrayEquals(expectedViolations.toArray(), violations.toArray());
+	}
+
+	@Test
+	public void canTake14WithGPA11() {
 		bebe.addTranscriptRecord(phys1, new Term("t1"), 13);
 		bebe.addTranscriptRecord(prog, new Term("t1"), 11);
 		bebe.addTranscriptRecord(math1, new Term("t1"), 9);
@@ -155,18 +191,22 @@ public class EnrollCtrlTest {
 		assertTrue(hasTaken(bebe, dm, math1, farsi, akhlagh, english, maaref));
 	}
 
-	@Test(expected = EnrollmentRulesViolationException.class)
-	public void cannotTake15WithGPA11() throws EnrollmentRulesViolationException {
+	@Test
+	public void cannotTake15WithGPA11() {
 		bebe.addTranscriptRecord(phys1, new Term("t1"), 13);
 		bebe.addTranscriptRecord(prog, new Term("t1"), 11);
 		bebe.addTranscriptRecord(math1, new Term("t1"), 9);
 
-		new EnrollCtrl().enroll(bebe, requestedOfferings(dm, math1, farsi, akhlagh, english, ap));
-		assertTrue(hasTaken(bebe, dm, math1, farsi, akhlagh, english, ap));
+		List<EnrollmentRulesViolationException> violations = new EnrollCtrl().enroll(bebe, requestedOfferings(dm, math1, farsi, akhlagh, english, ap));
+
+		List<EnrollmentRulesViolationException> expectedViolations = new ArrayList<>();
+		expectedViolations.add(new EnrollmentRulesViolationException("Number of units (15) requested does not match GPA of 11.000000"));
+
+		assertArrayEquals(expectedViolations.toArray(), violations.toArray());
 	}
 
 	@Test
-	public void canTake15WithGPA12() throws EnrollmentRulesViolationException {
+	public void canTake15WithGPA12() {
 		bebe.addTranscriptRecord(phys1, new Term("t1"), 15);
 		bebe.addTranscriptRecord(prog, new Term("t1"), 12);
 		bebe.addTranscriptRecord(math1, new Term("t1"), 9);
@@ -176,7 +216,7 @@ public class EnrollCtrlTest {
 	}
 
 	@Test
-	public void canTake15WithGPA15() throws EnrollmentRulesViolationException {
+	public void canTake15WithGPA15() {
 		bebe.addTranscriptRecord(phys1, new Term("t1"), 15);
 		bebe.addTranscriptRecord(prog, new Term("t1"), 15);
 		bebe.addTranscriptRecord(math1, new Term("t1"), 15);
@@ -185,18 +225,23 @@ public class EnrollCtrlTest {
 		assertTrue(hasTaken(bebe, dm, math2, farsi, akhlagh, english, maaref));
 	}
 
-	@Test(expected = EnrollmentRulesViolationException.class)
-	public void cannotTake18WithGPA15() throws EnrollmentRulesViolationException {
+	@Test
+	public void cannotTake18WithGPA15() {
 		bebe.addTranscriptRecord(phys1, new Term("t1"), 15);
 		bebe.addTranscriptRecord(prog, new Term("t1"), 15);
 		bebe.addTranscriptRecord(math1, new Term("t1"), 15);
 
-		new EnrollCtrl().enroll(bebe, requestedOfferings(ap, dm, math2, farsi, akhlagh, english, ap));
-		assertTrue(hasTaken(bebe, ap, dm, math2, farsi, akhlagh, english, ap));
+		List<EnrollmentRulesViolationException> violations = new EnrollCtrl().enroll(bebe, requestedOfferings(ap, dm, math2, farsi, akhlagh, english, ap));
+
+		List<EnrollmentRulesViolationException> expectedViolations = new ArrayList<>();
+		expectedViolations.add(new EnrollmentRulesViolationException("AP is requested to be taken twice"));
+		expectedViolations.add(new EnrollmentRulesViolationException("Number of units (18) requested does not match GPA of 15.000000"));
+		
+		assertArrayEquals(expectedViolations.toArray(), violations.toArray());
 	}
 
 	@Test
-	public void canTake20WithGPA16() throws EnrollmentRulesViolationException {
+	public void canTake20WithGPA16() {
 		bebe.addTranscriptRecord(phys1, new Term("t1"), 16);
 		bebe.addTranscriptRecord(prog, new Term("t1"), 16);
 		bebe.addTranscriptRecord(math1, new Term("t1"), 16);
@@ -206,16 +251,19 @@ public class EnrollCtrlTest {
 		assertTrue(hasTaken(bebe, ap, dm, math2, phys2, economy, karafarini, farsi));
 	}
 
-	@Test(expected = EnrollmentRulesViolationException.class)
-	public void cannotTake24() throws EnrollmentRulesViolationException {
+	@Test
+	public void cannotTake24() {
 		bebe.addTranscriptRecord(phys1, new Term("t1"), 16);
 		bebe.addTranscriptRecord(prog, new Term("t1"), 16);
 		bebe.addTranscriptRecord(math1, new Term("t1"), 16);
 
-		new EnrollCtrl().enroll(bebe, requestedOfferings(
+		List<EnrollmentRulesViolationException> violations = new EnrollCtrl().enroll(bebe, requestedOfferings(
 				ap, dm, math2, phys2, economy, karafarini, farsi, akhlagh, english));
-		assertTrue(hasTaken(bebe, ap, dm, math2, phys2, economy, karafarini, farsi, akhlagh, english));
-	}
 
+		List<EnrollmentRulesViolationException> expectedViolations = new ArrayList<>();
+		expectedViolations.add(new EnrollmentRulesViolationException("Number of units (24) requested does not match GPA of 16.000000"));
+
+		assertArrayEquals(expectedViolations.toArray(), violations.toArray());
+	}
 
 }
